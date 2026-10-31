@@ -201,4 +201,25 @@ footer{text-align:center;padding:30px 16px 50px;background:var(--navbg);color:va
  document.addEventListener('tripdataready',()=>setTimeout(decorate,0));document.addEventListener('authstatechanged',()=>setTimeout(decorate,0));document.getElementById('openHotels')?.addEventListener('click',()=>setTimeout(decorate,80));new MutationObserver(decorate).observe(document.getElementById('hotelCards'),{childList:true});decorate();
  addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))close()});
 })();
+</script><script id="hotel-live-refresh-js">
+(function(){
+ const root=document.getElementById('hotelCards');
+ if(!root)return;
+ function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+ function renderHotels(data){
+   const hotels=data?.hotels||[];
+   root.innerHTML='';
+   hotels.forEach(h=>{
+     const c=document.createElement('article');
+     c.className='hotel-card';
+     c.dataset.hotelId=h.id||'';
+     c.innerHTML='<div class="hotel-city">'+esc(h.city)+'</div><h3>'+esc(h.name)+'</h3><div class="hotel-stay">'+esc(h.stay)+'</div><div class="hotel-address">'+esc(h.address)+'</div><p class="hotel-note">'+esc(h.note)+'</p><div class="hotel-actions"><a class="primary" href="'+esc(h.map||'#')+'" target="_blank" rel="noopener">Map</a><a href="'+esc(h.site||'#')+'" target="_blank" rel="noopener">Hotel website</a><a class="phone-link" href="'+esc(h.tel||'#')+'">Call '+esc(h.phone)+'</a><button type="button" data-day="'+esc(h.day)+'">Trip day</button>'+(h.id?'<button type="button" class="hotel-edit-btn" data-hotel-id="'+esc(h.id)+'">Edit</button>':'')+'</div>';
+     root.appendChild(c);
+   });
+   root.querySelectorAll('[data-day]').forEach(b=>{if(!b.classList.contains('hotel-edit-btn'))b.onclick=()=>{document.getElementById('closeHotels')?.click();document.getElementById(b.dataset.day)?.scrollIntoView({behavior:'smooth'})}});
+ }
+ document.addEventListener('tripdataready',e=>renderHotels(e.detail));
+ if(window.TRIP_DATA_READY) window.TRIP_DATA_READY.then(renderHotels).catch(()=>{});
+ document.getElementById('openHotels')?.addEventListener('click',()=>{if(window.TRIP_DATA_READY)window.TRIP_DATA_READY.then(renderHotels).catch(()=>{})});
+})();
 </script></body></html>
