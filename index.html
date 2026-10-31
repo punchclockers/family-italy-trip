@@ -236,4 +236,32 @@ footer{text-align:center;padding:30px 16px 50px;background:var(--navbg);color:va
  document.addEventListener('click',e=>{const b=e.target.closest('.travel-edit-btn');if(b)openEditor(b.dataset.travelId)});$('travelEditCancel').onclick=close;modal.addEventListener('click',e=>{if(e.target===modal)close()});
  form.addEventListener('submit',async e=>{e.preventDefault();if(!window.NATALE_USER){status.textContent='Sign in before saving.';return}const c=window.NATALE_SUPABASE,id=Number($('editTravelId').value),u={item_type:$('editTravelType').value,title:$('editTravelName').value.trim(),trip_date:$('editTravelDate').value,start_time:$('editTravelStart').value||null,end_time:$('editTravelEnd').value||null,origin:$('editTravelOrigin').value.trim()||null,destination:$('editTravelDestination').value.trim()||null,seats:$('editTravelSeats').value.trim()||null,platform:$('editTravelPlatform').value.trim()||null,car:$('editTravelCar').value.trim()||null,confirmation:$('editTravelConfirmation').value.trim()||null,website:$('editTravelWebsite').value.trim()||null,notes:$('editTravelNotes').value.trim()||null,alert:$('editTravelAlert').value.trim()||null};status.textContent='Saving…';$('travelEditSave').disabled=true;const{data,error}=await c.from('trip_items').update(u).eq('id',id).select().single();$('travelEditSave').disabled=false;if(error){status.textContent=error.message;return}const list=window.TRIP_DATA?.travel||[],x=list.find(z=>String(z.id)===String(id));if(x){x.d=md(data.trip_date);x.k=data.item_type==='transportation'?'car':data.item_type;x.name=data.title;x.route=[data.origin,data.destination].filter(Boolean).join(' → ');x.time=[clock(data.start_time),clock(data.end_time)].filter(Boolean).join(' → ')||data.notes||'';const det=[];if(data.platform)det.push(data.platform);if(data.car)det.push('Car '+data.car);if(data.seats)det.push('Seats '+data.seats);if(data.confirmation)det.push('Confirmation '+data.confirmation);if(data.notes)det.push(data.notes);x.meta=det.join(' • ');x.alert=data.alert||'';x.url=data.website||''}render(window.TRIP_DATA);status.textContent='Saved to Supabase.';setTimeout(close,650)});
  document.addEventListener('tripdataready',e=>render(e.detail));if(window.TRIP_DATA_READY)window.TRIP_DATA_READY.then(render).catch(()=>{});$('openTravel')?.addEventListener('click',()=>{if(window.TRIP_DATA_READY)window.TRIP_DATA_READY.then(render).catch(()=>{})});document.addEventListener('authstatechanged',()=>render(window.TRIP_DATA));addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))close()});
-})();</script></body></html>
+})();</script><script id="travel-filter-editor-fix-js">
+(function(){
+ const root=document.getElementById('travelCards');
+ const filter=document.getElementById('travelFilter');
+ if(!root||!filter)return;
+ function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+ function render(kind){
+   const all=window.TRIP_DATA?.travel||[];
+   const segments=all.filter(x=>kind==='all'||x.k===kind);
+   root.innerHTML=''; let last='';
+   segments.forEach(x=>{
+     if(x.d!==last){last=x.d;const day=document.createElement('section');day.className='travel-day';day.innerHTML='<h3>'+esc(x.d)+'</h3>';root.appendChild(day)}
+     const day=root.lastElementChild,c=document.createElement('article');c.className='travel-card '+esc(x.k);c.dataset.travelId=x.id||'';
+     const label=x.k==='flight'?'Flight':x.k==='train'?'Train':'Car';
+     c.innerHTML='<div class="travel-kind">'+label+'</div><h4>'+esc(x.name)+'</h4><div class="travel-route">'+esc(x.route)+'</div><div class="travel-meta">'+esc(x.time)+'</div><div class="travel-meta">'+esc(x.meta)+'</div>'+(x.alert?'<div class="travel-alert">'+esc(x.alert)+'</div>':'')+'<div class="travel-links">'+(x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">Open carrier site</a>':'')+(x.id?'<button class="travel-edit-btn" type="button" data-travel-id="'+esc(x.id)+'">Edit</button>':'')+'</div>';
+     day.appendChild(c);
+   });
+   if(!segments.length)root.innerHTML='<div class="travel-empty">No travel segments in this view.</div>';
+ }
+ filter.querySelectorAll('button').forEach(b=>{
+   b.onclick=()=>{
+     filter.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+     render(b.dataset.kind||'all');
+   };
+ });
+ document.addEventListener('tripdataready',()=>{const k=filter.querySelector('.on')?.dataset.kind||'all';render(k)});
+ document.addEventListener('authstatechanged',()=>{const k=filter.querySelector('.on')?.dataset.kind||'all';render(k)});
+})();
+</script></body></html>
