@@ -158,7 +158,22 @@ footer img[alt="La Custode"]{object-fit:cover!important;object-position:50% 50%!
 #travelCards,#hotelCards,#plansCards,#todayAgenda{display:block!important;grid-template-columns:none!important;columns:auto!important}
 #travelCards>.u-card,#hotelCards>.u-card,#plansCards>.u-card,#todayAgenda>.u-card,.db-itinerary>.u-card{display:block!important;width:auto!important;min-width:0!important;max-width:none!important;box-sizing:border-box!important;float:none!important}
 @media(max-width:520px){.u-grid{grid-template-columns:1fr}.u-field.full{grid-column:auto}.u-card{padding-left:55px}}
-</style></head><body>
+</style>
+<style id="desktop-card-layout-fix">
+/* Preserve the phone layout while restoring a roomy desktop itinerary column. */
+@media (min-width:760px){
+  article.day{grid-template-columns:150px minmax(0,1fr)!important;align-items:start!important}
+  article.day>.db-itinerary{grid-column:2!important;min-width:0!important;width:100%!important;margin-top:0!important}
+  article.day>.db-itinerary>.u-card{width:100%!important;max-width:100%!important;margin:15px 0!important}
+}
+@media (min-width:900px){
+  main{max-width:980px!important}
+  .travel-wrap,.hotels-wrap,.plans-wrap,.today-wrap{width:min(920px,calc(100% - 32px))!important;max-width:920px!important;margin-left:auto!important;margin-right:auto!important}
+  #travelCards,#hotelCards,#plansCards,#todayAgenda{width:100%!important;max-width:100%!important}
+  #travelCards>.u-card,#hotelCards>.u-card,#plansCards>.u-card,#todayAgenda>.u-card{width:100%!important;max-width:100%!important;margin-left:0!important;margin-right:0!important}
+}
+</style>
+</head><body>
 <svg height="0" style="position:absolute" width="0"><defs><symbol id="bed" viewbox="0 0 24 24"><path d="M3 18V7M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.6"></path></symbol><symbol id="car" viewbox="0 0 24 24"><path d="M4 16v-4l2-5h12l2 5v4M4 16h16M7 19v-3M17 19v-3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.6"></path><circle cx="8" cy="13" r="1"></circle><circle cx="16" cy="13" r="1"></circle></symbol></defs></svg>
 <nav class="nav"><div class="chips"><a class="on" href="#dec-23">23<small>Dec</small></a><a href="#dec-24">24<small>Dec</small></a><a href="#dec-25">25<small>Dec</small></a><a href="#dec-26">26<small>Dec</small></a><a href="#dec-27">27<small>Dec</small></a><a href="#dec-28">28<small>Dec</small></a><a href="#dec-29">29<small>Dec</small></a><a href="#dec-30">30<small>Dec</small></a><a href="#dec-31">31<small>Dec</small></a><a href="#jan-01">1<small>Jan</small></a><a href="#jan-02">2<small>Jan</small></a></div><div class="track"><i id="train" style="left: 0%;"></i></div></nav>
 <button class="hotels-launch" id="openHotels" type="button">Hotels</button><section aria-hidden="true" aria-label="Hotels" class="hotels-screen" id="hotelsScreen"><div class="hotels-top"><button id="closeHotels" type="button">Back</button><h2>Hotels</h2><span class="offline-pill">Offline</span></div><div class="hotels-wrap"><div class="hotels-hero"><h1>Your stays</h1><p>Addresses, maps and hotel websites, ready when you need them.</p></div><div id="hotelCards"></div></div></section><button class="travel-launch" id="openTravel" type="button">Travel</button><section aria-hidden="true" aria-label="Travel" class="travel-screen" id="travelScreen"><div class="travel-top"><button id="closeTravel" type="button">Back</button><h2>Travel</h2><span class="offline-pill">Offline</span></div><div class="travel-wrap"><div class="travel-hero"><h1>Getting there</h1><p>Flights, trains, transfers and the rental car in one place.</p></div><div class="travel-filter" id="travelFilter"></div><div id="travelCards"></div></div></section><button class="today-launch" id="openToday" type="button">Today</button>
