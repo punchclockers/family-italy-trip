@@ -276,4 +276,25 @@ article.day[id^="day-"]>h2{margin-top:0} @media(min-width:760px){article.day[id^
  function smartForm(){const form=$('universalForm'),type=$('uType').value;form.dataset.type=type;const labels={hotel:['Check in','Check out'],flight:['Departure date','Arrival date'],train:['Date','Date'],restaurant:['Date','Date'],activity:['Date','Date'],car:['Date','Date'],transportation:['Date','Date'],note:['Date','Date']};const pair=labels[type]||['Start date','End date'];const sd=$('uStartDate')?.parentElement.querySelector('.u-label-text'),ed=$('uEndDate')?.parentElement.querySelector('.u-label-text');if(sd)sd.textContent=pair[0];if(ed)ed.textContent=pair[1];if(type!=='hotel'&&type!=='flight')$('uEndDate').value=$('uStartDate').value} $('uType').addEventListener('change',smartForm);$('uStartDate').addEventListener('change',()=>{const t=$('uType').value;if(t!=='hotel'&&t!=='flight')$('uEndDate').value=$('uStartDate').value});$('uAdvanced')?.addEventListener('click',()=>{const f=$('universalForm');f.classList.toggle('show-advanced');$('uAdvanced').textContent=f.classList.contains('show-advanced')?'Hide sort order':'Show sort order'});const _openForm=openForm;openForm=function(x=null){_openForm(x);smartForm()};smartForm();
  window.refreshAllItineraryViews=load;window.addEventListener('load',()=>setTimeout(load,700));
 })();
-</script></body></html>
+</script><script id="banner-date-links-js">
+(()=>{
+ const isoFrom=(txt)=>{const m=String(txt||'').match(/\b(?:Dec(?:ember)?\s+(\d{1,2})|Jan(?:uary)?\s+(\d{1,2}))\b/i);if(!m)return'';const dec=m[1],jan=m[2];return dec?`2026-12-${String(dec).padStart(2,'0')}`:`2027-01-${String(jan).padStart(2,'0')}`};
+ function wireBannerDates(){
+   const candidates=[...document.querySelectorAll('header a,header button,header [role="button"],header .date,header time,.top a,.top button,.hero a,.hero button')];
+   candidates.forEach(el=>{
+     const d=el.dataset.tripDate||isoFrom(el.textContent);if(!d||el.dataset.dayJump==='1')return;
+     el.dataset.dayJump='1';el.style.cursor='pointer';el.setAttribute('title','Jump to '+d);
+     el.addEventListener('click',e=>{
+       const target=document.getElementById('day-'+d);if(!target)return;
+       e.preventDefault();
+       document.querySelectorAll('.app-bottom-nav button').forEach(b=>{if(/trip/i.test(b.textContent||''))b.click()});
+       requestAnimationFrame(()=>target.scrollIntoView({behavior:'smooth',block:'start'}));
+     });
+   });
+ }
+ window.wireBannerDates=wireBannerDates;
+ window.addEventListener('load',()=>setTimeout(wireBannerDates,900));
+ document.addEventListener('click',e=>{if(e.target.closest('#universalAdd,[data-u-edit],[data-u-delete]'))return;setTimeout(wireBannerDates,50)},{passive:true});
+})();
+</script>
+</body></html>
