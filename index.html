@@ -190,9 +190,9 @@ footer img[alt="La Custode"]{object-fit:cover!important;object-position:50% 50%!
 .app-bottom-nav{grid-template-columns:repeat(2,1fr)!important}
 </style><style id="dynamic-timeline-css">
 article.day[id^="day-"]>h2{margin-top:0} @media(min-width:760px){article.day[id^="day-"]{grid-template-columns:150px minmax(0,1fr)!important}article.day[id^="day-"]>h2{grid-column:1!important}article.day[id^="day-"]>.db-itinerary{grid-column:2!important}}
-</style></head><body>
+</style><style id="dynamic-banner-css">.chips{overflow-x:auto!important;scrollbar-width:thin;justify-content:flex-start!important}.chips a{flex:0 0 auto}</style></head><body>
 <svg height="0" style="position:absolute" width="0"><defs><symbol id="bed" viewbox="0 0 24 24"><path d="M3 18V7M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.6"></path></symbol><symbol id="car" viewbox="0 0 24 24"><path d="M4 16v-4l2-5h12l2 5v4M4 16h16M7 19v-3M17 19v-3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.6"></path><circle cx="8" cy="13" r="1"></circle><circle cx="16" cy="13" r="1"></circle></symbol></defs></svg>
-<nav class="nav"><div class="chips"><a class="on" href="#dec-23">23<small>Dec</small></a><a href="#dec-24">24<small>Dec</small></a><a href="#dec-25">25<small>Dec</small></a><a href="#dec-26">26<small>Dec</small></a><a href="#dec-27">27<small>Dec</small></a><a href="#dec-28">28<small>Dec</small></a><a href="#dec-29">29<small>Dec</small></a><a href="#dec-30">30<small>Dec</small></a><a href="#dec-31">31<small>Dec</small></a><a href="#jan-01">1<small>Jan</small></a><a href="#jan-02">2<small>Jan</small></a></div><div class="track"><i id="train" style="left: 0%;"></i></div></nav>
+<nav class="nav"><div class="chips"><a class="on" data-day-link="1" href="#day-2026-12-23">23<small>Dec</small></a><a data-day-link="1" href="#day-2026-12-24">24<small>Dec</small></a><a data-day-link="1" href="#day-2026-12-25">25<small>Dec</small></a><a data-day-link="1" href="#day-2026-12-26">26<small>Dec</small></a><a data-day-link="1" href="#day-2026-12-27">27<small>Dec</small></a><a data-day-link="1" href="#day-2026-12-28">28<small>Dec</small></a><a data-day-link="1" href="#day-2026-12-29">29<small>Dec</small></a><a data-day-link="1" href="#day-2026-12-30">30<small>Dec</small></a><a data-day-link="1" href="#day-2026-12-31">31<small>Dec</small></a><a data-day-link="1" href="#day-2027-01-01">1<small>Jan</small></a><a data-day-link="1" href="#day-2027-01-02">2<small>Jan</small></a></div><div class="track"><i id="train" style="left: 0%;"></i></div></nav>
 <button class="hotels-launch" id="openHotels" type="button">Hotels</button><button class="travel-launch" id="openTravel" type="button">Travel</button><button class="today-launch" id="openToday" type="button">Today</button>
 <section aria-hidden="true" aria-label="Today" class="today-screen" id="todayScreen">
 <div class="today-top"><button id="closeToday" type="button">Back</button><h2>Natale in Italia</h2><span class="offline-pill">Offline</span></div>
@@ -264,7 +264,7 @@ article.day[id^="day-"]>h2{margin-top:0} @media(min-width:760px){article.day[id^
  function renderTravel(){}
  function renderHotels(){}
  function renderPlans(){}
- function renderAll(){renderDaily();renderToday();renderTravel();renderHotels();renderPlans()}
+ function renderBanner(){const chips=document.querySelector('.chips');if(!chips)return;const dates=allTimelineDates();chips.innerHTML=dates.map((d,i)=>{const dt=new Date(d+'T12:00:00');return `<a href="#day-${d}" data-day-link="1" class="${i===0?'on':''}" data-trip-date="${d}">${dt.getDate()}<small>${dt.toLocaleDateString([],{month:'short'})}</small></a>`}).join('');const first=dates[0],last=dates[dates.length-1],when=document.querySelector('.hero .when');if(when&&first&&last){const f=new Date(first+'T12:00:00'),l=new Date(last+'T12:00:00');when.textContent=f.toLocaleDateString([],{month:'long',day:'numeric',year:'numeric'})+' to '+l.toLocaleDateString([],{month:'long',day:'numeric',year:'numeric'})}} function renderAll(){renderDaily();renderBanner();renderToday();renderTravel();renderHotels();renderPlans()}
  async function load(){if(!window.NATALE_SUPABASE)return;const {data,error}=await window.NATALE_SUPABASE.from('trip_items').select('*').order('start_date').order('start_time').order('sort_order');if(error){console.error(error);return}items=data||[];renderAll()}
  const fields={item_type:'uType',title:'uTitle',start_date:'uStartDate',end_date:'uEndDate',start_time:'uStartTime',end_time:'uEndTime',city:'uCity',address:'uAddress',origin:'uOrigin',destination:'uDestination',confirmation:'uConfirmation',platform:'uPlatform',car:'uCar',seats:'uSeats',notes:'uNotes',alert:'uAlert',map_url:'uMap',website:'uWebsite',phone:'uPhone',sort_order:'uSort'};
  function requireUser(){if(window.NATALE_USER)return true;$('authLaunch')?.click();return false}
@@ -276,25 +276,17 @@ article.day[id^="day-"]>h2{margin-top:0} @media(min-width:760px){article.day[id^
  function smartForm(){const form=$('universalForm'),type=$('uType').value;form.dataset.type=type;const labels={hotel:['Check in','Check out'],flight:['Departure date','Arrival date'],train:['Date','Date'],restaurant:['Date','Date'],activity:['Date','Date'],car:['Date','Date'],transportation:['Date','Date'],note:['Date','Date']};const pair=labels[type]||['Start date','End date'];const sd=$('uStartDate')?.parentElement.querySelector('.u-label-text'),ed=$('uEndDate')?.parentElement.querySelector('.u-label-text');if(sd)sd.textContent=pair[0];if(ed)ed.textContent=pair[1];if(type!=='hotel'&&type!=='flight')$('uEndDate').value=$('uStartDate').value} $('uType').addEventListener('change',smartForm);$('uStartDate').addEventListener('change',()=>{const t=$('uType').value;if(t!=='hotel'&&t!=='flight')$('uEndDate').value=$('uStartDate').value});$('uAdvanced')?.addEventListener('click',()=>{const f=$('universalForm');f.classList.toggle('show-advanced');$('uAdvanced').textContent=f.classList.contains('show-advanced')?'Hide sort order':'Show sort order'});const _openForm=openForm;openForm=function(x=null){_openForm(x);smartForm()};smartForm();
  window.refreshAllItineraryViews=load;window.addEventListener('load',()=>setTimeout(load,700));
 })();
-</script><script id="banner-date-links-js">
-(()=>{
- const isoFrom=(txt)=>{const m=String(txt||'').match(/\b(?:Dec(?:ember)?\s+(\d{1,2})|Jan(?:uary)?\s+(\d{1,2}))\b/i);if(!m)return'';const dec=m[1],jan=m[2];return dec?`2026-12-${String(dec).padStart(2,'0')}`:`2027-01-${String(jan).padStart(2,'0')}`};
- function wireBannerDates(){
-   const candidates=[...document.querySelectorAll('header a,header button,header [role="button"],header .date,header time,.top a,.top button,.hero a,.hero button')];
-   candidates.forEach(el=>{
-     const d=el.dataset.tripDate||isoFrom(el.textContent);if(!d||el.dataset.dayJump==='1')return;
-     el.dataset.dayJump='1';el.style.cursor='pointer';el.setAttribute('title','Jump to '+d);
-     el.addEventListener('click',e=>{
-       const target=document.getElementById('day-'+d);if(!target)return;
-       e.preventDefault();
-       document.querySelectorAll('.app-bottom-nav button').forEach(b=>{if(/trip/i.test(b.textContent||''))b.click()});
-       requestAnimationFrame(()=>target.scrollIntoView({behavior:'smooth',block:'start'}));
-     });
-   });
- }
- window.wireBannerDates=wireBannerDates;
- window.addEventListener('load',()=>setTimeout(wireBannerDates,900));
- document.addEventListener('click',e=>{if(e.target.closest('#universalAdd,[data-u-edit],[data-u-delete]'))return;setTimeout(wireBannerDates,50)},{passive:true});
-})();
 </script>
-</body></html>
+<script id="dynamic-banner-links-js">
+(()=>{
+ document.addEventListener('click',e=>{
+   const a=e.target.closest('.chips a[data-day-link="1"]');if(!a)return;
+   e.preventDefault();
+   const id=a.getAttribute('href').slice(1);
+   const trip=[...document.querySelectorAll('.app-bottom-nav button')].find(b=>/^\s*Trip\s*$/i.test(b.textContent||''));if(trip)trip.click();
+   document.querySelectorAll('.chips a').forEach(x=>x.classList.toggle('on',x===a));
+   history.replaceState(null,'','#'+id);
+   requestAnimationFrame(()=>requestAnimationFrame(()=>document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'})));
+ });
+})();
+</script></body></html>
