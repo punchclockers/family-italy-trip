@@ -396,7 +396,7 @@ article.day[id^="day-"]>h2{margin-top:0} @media(min-width:760px){article.day[id^
    requestAnimationFrame(()=>requestAnimationFrame(()=>document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'})));
  });
 })();
-</script><div class="app-build" id="appBuild">Build 2026.11.01.20</div><div aria-labelledby="dayModalTitle" aria-modal="true" class="u-modal" id="dayModal" role="dialog"><form class="u-form" id="dayForm"><h2 id="dayModalTitle">Edit day</h2><input id="dayDate" type="hidden"/><div class="u-grid"><label class="u-field full">Day title<input id="dayTitle"/></label><label class="u-field full">Character<select id="dayCharacter"><option value="none">None</option><option value="capotreno">Il Capotreno</option><option value="cartografo">Il Cartografo</option><option value="narratrice">La Narratrice</option><option value="custode">La Custode</option></select></label><label class="u-field full">Character comment<textarea id="dayComment"></textarea></label></div><div class="u-status" id="dayStatus"></div><div class="u-form-actions"><span></span><div class="right"><button id="dayCancel" type="button">Cancel</button><button class="save" type="submit">Save day</button></div></div></form></div><script id="day-editor-js">(()=>{const $=id=>document.getElementById(id);const currentMeta=()=>Array.isArray(window.NATALE_DAY_META)?window.NATALE_DAY_META:[];function openDay(d){if(!window.NATALE_USER){$('authLaunch')?.click();return}const m=currentMeta().find(x=>x.trip_date===d)||{};$('dayDate').value=d;$('dayTitle').value=m.day_title||'';$('dayCharacter').value=m.character_key||'none';$('dayComment').value=m.comment||'';$('dayStatus').textContent='';$('dayModal').classList.add('open')}document.addEventListener('click',e=>{const b=e.target.closest('[data-day-edit]');if(!b)return;e.preventDefault();openDay(b.dataset.dayEdit)});$('dayCancel')?.addEventListener('click',()=>$('dayModal').classList.remove('open'));$('dayForm')?.addEventListener('submit',async e=>{e.preventDefault();if(!window.NATALE_USER){$('dayStatus').textContent='Sign in before saving.';return}const row={trip_date:$('dayDate').value,day_title:$('dayTitle').value.trim()||null,character_key:$('dayCharacter').value,comment:$('dayComment').value.trim()||null};$('dayStatus').textContent='Saving…';const {data,error}=await window.NATALE_SUPABASE.from('trip_days').upsert(row,{onConflict:'trip_date'}).select().single();if(error){$('dayStatus').textContent='Save failed: '+error.message;return}const list=currentMeta(),i=list.findIndex(x=>x.trip_date===row.trip_date);if(i>=0)list[i]=data;else list.push(data);window.NATALE_DAY_META=list;$('dayModal').classList.remove('open');await window.refreshAllItineraryViews()})})();</script>
+</script><div class="app-build" id="appBuild">Build 2026.11.01.21</div><div aria-labelledby="dayModalTitle" aria-modal="true" class="u-modal" id="dayModal" role="dialog"><form class="u-form" id="dayForm"><h2 id="dayModalTitle">Edit day</h2><input id="dayDate" type="hidden"/><div class="u-grid"><label class="u-field full">Day title<input id="dayTitle"/></label><label class="u-field full">Character<select id="dayCharacter"><option value="none">None</option><option value="capotreno">Il Capotreno</option><option value="cartografo">Il Cartografo</option><option value="narratrice">La Narratrice</option><option value="custode">La Custode</option></select></label><label class="u-field full">Character comment<textarea id="dayComment"></textarea></label></div><div class="u-status" id="dayStatus"></div><div class="u-form-actions"><span></span><div class="right"><button id="dayCancel" type="button">Cancel</button><button class="save" type="submit">Save day</button></div></div></form></div><script id="day-editor-js">(()=>{const $=id=>document.getElementById(id);const currentMeta=()=>Array.isArray(window.NATALE_DAY_META)?window.NATALE_DAY_META:[];function openDay(d){if(!window.NATALE_USER){$('authLaunch')?.click();return}const m=currentMeta().find(x=>x.trip_date===d)||{};$('dayDate').value=d;$('dayTitle').value=m.day_title||'';$('dayCharacter').value=m.character_key||'none';$('dayComment').value=m.comment||'';$('dayStatus').textContent='';$('dayModal').classList.add('open')}document.addEventListener('click',e=>{const b=e.target.closest('[data-day-edit]');if(!b)return;e.preventDefault();openDay(b.dataset.dayEdit)});$('dayCancel')?.addEventListener('click',()=>$('dayModal').classList.remove('open'));$('dayForm')?.addEventListener('submit',async e=>{e.preventDefault();if(!window.NATALE_USER){$('dayStatus').textContent='Sign in before saving.';return}const row={trip_date:$('dayDate').value,day_title:$('dayTitle').value.trim()||null,character_key:$('dayCharacter').value,comment:$('dayComment').value.trim()||null};$('dayStatus').textContent='Saving…';const {data,error}=await window.NATALE_SUPABASE.from('trip_days').upsert(row,{onConflict:'trip_date'}).select().single();if(error){$('dayStatus').textContent='Save failed: '+error.message;return}const list=currentMeta(),i=list.findIndex(x=>x.trip_date===row.trip_date);if(i>=0)list[i]=data;else list.push(data);window.NATALE_DAY_META=list;$('dayModal').classList.remove('open');await window.refreshAllItineraryViews()})})();</script>
 <!-- NATALE_PHOTOS_V1: card thumbnails, day galleries, upload, viewer -->
 <style id="natale-photo-css">
 .photo-strip,.day-photo-gallery{margin-top:12px;padding-top:10px;border-top:1px solid color-mix(in srgb,var(--line) 66%,transparent)}
@@ -444,6 +444,22 @@ article.day[id^="day-"]>h2{margin-top:0} @media(min-width:760px){article.day[id^
 </script>
 
 
+<div class="journey-modal" id="journeyModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="journeyModalTitle">
+ <form class="journey-form" id="journeyForm">
+  <h2 id="journeyModalTitle">Create a New Journey</h2><p class="jf-sub">Start the album. You can fill the itinerary after the journey is created.</p>
+  <div class="jf-grid">
+   <label class="jf-field full">Journey title<input id="journeyTitle" required maxlength="80" placeholder="Scotland in Summer"></label>
+   <label class="jf-field full">Subtitle<input id="journeySubtitle" maxlength="120" placeholder="Highlands, islands & old roads"></label>
+   <label class="jf-field">Start date<input id="journeyStart" required type="date"></label>
+   <label class="jf-field">End date<input id="journeyEnd" required type="date"></label>
+   <label class="jf-field full">Theme<select id="journeyTheme"><option value="classic">Classic Travel Album</option><option value="natale">Natale / Christmas</option></select></label>
+   <label class="jf-field full">Album cover image<input id="journeyCover" type="file" accept="image/*"><img id="journeyCoverPreview" class="cover-preview" alt="Selected album cover preview"></label>
+  </div>
+  <div class="jf-status" id="journeyStatus"></div>
+  <div class="jf-actions"><button id="journeyCancel" type="button">Cancel</button><button class="primary" type="submit">Create Journey</button></div>
+ </form>
+</div>
+
 <script id="album-landing-js">
 (()=>{
  const $=id=>document.getElementById(id), landing=$('albumLanding'), grid=$('albumGrid'), status=$('albumStatus');
@@ -466,19 +482,4 @@ article.day[id^="day-"]>h2{margin-top:0} @media(min-width:760px){article.day[id^
 })();
 </script>
 
-<div class="journey-modal" id="journeyModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="journeyModalTitle">
- <form class="journey-form" id="journeyForm">
-  <h2 id="journeyModalTitle">Create a New Journey</h2><p class="jf-sub">Start the album. You can fill the itinerary after the journey is created.</p>
-  <div class="jf-grid">
-   <label class="jf-field full">Journey title<input id="journeyTitle" required maxlength="80" placeholder="Scotland in Summer"></label>
-   <label class="jf-field full">Subtitle<input id="journeySubtitle" maxlength="120" placeholder="Highlands, islands & old roads"></label>
-   <label class="jf-field">Start date<input id="journeyStart" required type="date"></label>
-   <label class="jf-field">End date<input id="journeyEnd" required type="date"></label>
-   <label class="jf-field full">Theme<select id="journeyTheme"><option value="classic">Classic Travel Album</option><option value="natale">Natale / Christmas</option></select></label>
-   <label class="jf-field full">Album cover image<input id="journeyCover" type="file" accept="image/*"><img id="journeyCoverPreview" class="cover-preview" alt="Selected album cover preview"></label>
-  </div>
-  <div class="jf-status" id="journeyStatus"></div>
-  <div class="jf-actions"><button id="journeyCancel" type="button">Cancel</button><button class="primary" type="submit">Create Journey</button></div>
- </form>
-</div>
 </body></html>
